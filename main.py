@@ -1,10 +1,10 @@
 import random
-
+import matplotlib.pyplot as plt
 
 NUM_ROWS = 8
 MAX_FITNESS = 2
-GENERATION_SIZE = 10
-GENERATIONS = 20
+GENERATION_SIZE = 50
+NUM_GENERATIONS = 100
 ELITE = 2
 MUTATION_PROBABILITY = 0.001
 
@@ -19,6 +19,7 @@ def num_of_conflicts(board):
 
 def fitness(board):
     # return high fitness for fewer conflicts in positions
+    #return (64 - num_of_conflicts(board))
     score = num_of_conflicts(board)
     if score == 0:
         return MAX_FITNESS
@@ -60,8 +61,8 @@ def mutate(chromosome):
     random_number = random.random()
     # Check if the random number is less than or equal to the probability
     if random_number <= MUTATION_PROBABILITY:
-        mutated_position = random.randint(0, 8)
-        mutated_value = random.randint(0, 8)
+        mutated_position = random.randint(0, 7)
+        mutated_value = random.randint(0, 7)
         chromosome[mutated_position] = mutated_value
     return chromosome
 
@@ -89,10 +90,11 @@ def elitism_helper(population, fitness_scores):
     return best_indices, worst_indices
 
 def eight_queens_GA():
+    best_fitness = []
     # intialize population
     population = generate_randon_population()
     # do for each generation
-    for gen in range(GENERATIONS):
+    for gen in range(NUM_GENERATIONS):
         fitness_values = []
         new_gen = []
         # evaluate fitness for each chromosome
@@ -101,8 +103,12 @@ def eight_queens_GA():
         #new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(population, fitness_values)
+        # save best fitness
+        best_chromosomes.sort(reverse=True)
+        best_fitness.append(fitness_values[best_chromosomes[0]])
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])
+        worst_chromosomes.sort(reverse=True)  # Sorting in reverse order to avoid index issues
         for bad_i in worst_chromosomes:
             population.remove(population[bad_i])
             fitness_values.remove(fitness_values[bad_i])
@@ -119,18 +125,27 @@ def eight_queens_GA():
             new_gen.append(child_2)
 
         # move to next gen
-        population = new_gen
+        population = list(new_gen)
+
+    # Create the plot
+    plt.plot(range(NUM_GENERATIONS), best_fitness)
+    # Set x-axis ticks to display only whole numbers
+    plt.xticks(range(NUM_GENERATIONS))
+    plt.show()
+
 
 
 
 
 def eight_queens_random_sol():
     # find a random solution to 8 queens problem
+    num_of_tries = 0
     while True:
         board = [random.randint(0, NUM_ROWS-1) for _ in range(NUM_ROWS)]
         if num_of_conflicts(board) == 0:
             # print_board(board)
-            return board
+            return board, num_of_tries
+
 
 
 def print_board(board):
@@ -144,7 +159,9 @@ def print_board(board):
         print()
 
 def main():
-    eight_queens_random_sol()
+    # eight_queens_random_sol()
+    eight_queens_GA()
+
 
 
 

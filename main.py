@@ -63,7 +63,6 @@ def mutate(chromosome):
         mutated_position = random.randint(0, 8)
         mutated_value = random.randint(0, 8)
         chromosome[mutated_position] = mutated_value
-
     return chromosome
 
 
@@ -96,7 +95,6 @@ def eight_queens_GA():
     for gen in range(GENERATIONS):
         fitness_values = []
         new_gen = []
-        children = []
         # evaluate fitness for each chromosome
         for chrom in population:
             fitness_values.append(fitness(chrom))
@@ -113,9 +111,15 @@ def eight_queens_GA():
         # 3) crossover
         for (parent1, parent2) in parents:
             child_1, child_2 = crossover(parent1, parent2)
-            # 4) mutation in low probability
-
+            # 4) mutation
+            child_1 = mutate(child_1)
+            child_2 = mutate(child_2)
             #add to new generation
+            new_gen.append(child_1)
+            new_gen.append(child_2)
+
+        # move to next gen
+        population = new_gen
 
 
 

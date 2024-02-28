@@ -5,7 +5,8 @@ NUM_ROWS = 8
 MAX_FITNESS = 2
 GENERATION_SIZE = 10
 GENERATIONS = 20
-
+ELITE = 2
+MUTATION_PROBABILITY = 0.001
 
 def num_of_conflicts(board):
     conflicts = 0
@@ -26,56 +27,48 @@ def fitness(board):
 
 
 # Select parents for crossover using proportioned selection
-def selection(population):
+def selection(population, fitness_vals):
     # select parents for crossover
+
+    # Calculate total fitness sum of the population
+    total_fitness = sum(fitness for fitness in fitness_vals)
+    # Calculate probabilities for each individual based on fitness
+    probabilities = [fitness / total_fitness for fitness in fitness_vals]
+    parents = []
+    pairs_num = (GENERATION_SIZE - ELITE)//2
+    for g in range(pairs_num):
+        # Select an individual using proportional selection
+        selected_index1 = random.choices(range(len(population)), weights=probabilities)[0]
+        parent_1 = population[selected_index1]
+        selected_index2 = random.choices(range(len(population)), weights=probabilities)[0]
+        parent_2 = population[selected_index2]
+
+        parents.append((parent_1, parent_2))
+    return parents
 
 
 # Crossover operation (single-point crossover)
 def crossover(parent1, parent2):
     crossover_point = random.randint(1, 7)
-    child = parent1[:crossover_point] + parent2[crossover_point:]
-    return child
+    child1 = parent1[:crossover_point] + parent2[crossover_point:]
+    child2 = parent2[:crossover_point] + parent1[crossover_point:]
+    return child1, child2
 
-# Mutation operation (swap two positions)
-def mutate(board_state):
-    pos1, pos2 = random.sample(range(8), 2)
-    board_state[pos1], board_state[pos2] = board_state[pos2], board_state[pos1]
-    return board_state
 
-# Generate the initial population
-population = [(generate_board_state(), 0) for _ in range(POPULATION_SIZE)]
+# Mutation operation: switch a value in the chromosome in valid range
+def mutate(chromosome):
+    random_number = random.random()
+    # Check if the random number is less than or equal to the probability
+    if random_number <= MUTATION_PROBABILITY:
+        mutated_position = random.randint(0, 8)
+        mutated_value = random.randint(0, 8)
+        chromosome[mutated_position] = mutated_value
 
-# Main Genetic Algorithm loop
-for generation in range(MAX_GENERATIONS):
-    # Calculate fitness for each board state
-    population = [(board_state, calculate_fitness(board_state)) for board_state, _ in population]
-
-    # Check if solution is found
-    best_board_state = max(population, key=lambda x: x[1])[0]
-    if calculate_fitness(best_board_state) == 28:
-        print("Solution found in generation", generation)
-        break
-
-    # Create the next generation
-    new_population = []
-
-    # Elitism: Keep the best board state from the previous generation
-    new_population.append(max(population, key=lambda x: x[1]))
-
-    # Perform selection, crossover, and mutation
-    while len(new_population) < POPULATION_SIZE:
-        parent1 = selection(population)
-        parent2 = selection(population)
-        child = crossover(parent1[0], parent2[0])
-        if random.random() < MUTATION_RATE:
-            child = mutate(child)
-        new_population.append((child, 0))
-
-    # Update the population
-    population = new_populatio
+    return chromosome
 
 
 def generate_randon_population():
+    # generate the first generation
     population = []
     for i in range(GENERATION_SIZE):
         chrom = [random.randint(0, NUM_ROWS - 1) for _ in range(NUM_ROWS)]
@@ -88,13 +81,13 @@ def elitism_helper(population, fitness_scores):
     sorted_indices = sorted(range(len(fitness_scores)), key=lambda k: fitness_scores[k])
 
     # Get the indices of the arrays with the best and worst scores
-    best_indices = sorted_indices[-2:]
-    worst_indices = sorted_indices[:2]
+    best_indices = sorted_indices[-ELITE:]
+    worst_indices = sorted_indices[:ELITE]
 
-    # Get the arrays corresponding to the best and worst scores
-    best_chromosomes= [population[i] for i in best_indices]
-    worst_chromosomes = [population[i] for i in worst_indices]
-    return best_chromosomes, worst_chromosomes
+    # # Get the arrays corresponding to the best and worst scores
+    # best_chromosomes= [population[i] for i in best_indices]
+    # worst_chromosomes = [population[i] for i in worst_indices]
+    return best_indices, worst_indices
 
 def eight_queens_GA():
     # intialize population
@@ -103,21 +96,26 @@ def eight_queens_GA():
     for gen in range(GENERATIONS):
         fitness_values = []
         new_gen = []
+        children = []
         # evaluate fitness for each chromosome
         for chrom in population:
             fitness_values.append(fitness(chrom))
         #new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(population, fitness_values)
-        for good_c in best_chromosomes:
-            new_gen.append(good_c)
-        for bad_c in worst_chromosomes:
-            population.remove(bad_c)
-
+        for good_i in best_chromosomes:
+            new_gen.append(population[good_i])
+        for bad_i in worst_chromosomes:
+            population.remove(population[bad_i])
+            fitness_values.remove(fitness_values[bad_i])
         # 2) selection
-
+        parents = selection(population, fitness_values)
         # 3) crossover
-        # 4) mutation
+        for (parent1, parent2) in parents:
+            child_1, child_2 = crossover(parent1, parent2)
+            # 4) mutation in low probability
+
+            #add to new generation
 
 
 

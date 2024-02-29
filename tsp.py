@@ -24,7 +24,7 @@ def fitness(chromosome):
     path_cost = 0
     for i in range(NUM_CITIES - 1):
         path_cost += euclidean_distance(chromosome[i], chromosome[i+1])
-    return path_cost
+    return 1 / path_cost
 
 
 # Select parents for crossover using proportioned selection
@@ -53,11 +53,11 @@ def crossover(parent1, parent2):
 
     child1 = parent1[:crossover_point]
     unvisited = parent1[crossover_point:]
-    child1 += [city for city in parent2 if city in unvisited]
+    child1 += [city for city in parent2[1:] if city in unvisited]
 
     child2 = parent2[:crossover_point]
     unvisited = parent2[crossover_point:]
-    child2 += [city for city in parent1 if city in unvisited]
+    child2 += [city for city in parent1[1:] if city in unvisited]
 
     return child1, child2
 
@@ -73,15 +73,15 @@ def mutate(chromosome):
     return chromosome
 
 
-def generate_random_population():
-    # generate the first generation
+def generate_map():
     map = set()
-    while len(map) < NUM_CITIES-1:
+    while len(map) < NUM_CITIES - 1:
         map.add((random.randint(MIN_INT, MAX_INT), random.randint(MIN_INT, MAX_INT)))
+    return map
 
-    start_point = random.choice(tuple(map))
+def generate_random_population(map, start_point):
+    # generate the first generation
     map.remove(start_point)
-
     population = []
     for i in range(GENERATION_SIZE):
         chrom = list(map)
@@ -103,12 +103,12 @@ def elitism_helper(fitness_scores):
     return best_indices, worst_indices
 
 
-def tsp_GA():
+def tsp_GA(map, start_point):
     best_fitness = [] #todo change to avg?
     # best_chromosomes = [] todo
     # worst_chromosomes = []
     # initialize population
-    population = generate_random_population()
+    population = generate_random_population(map, start_point)
     # do for each generation
     gen = 0
     while gen < NUM_GENERATIONS:
@@ -123,6 +123,8 @@ def tsp_GA():
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
         best_chromosomes.sort(reverse=True)
         best_fitness.append(fitness_values[best_chromosomes[0]])
+        if gen == NUM_GENERATIONS-1:
+            print(population[best_chromosomes[0]])
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])
         worst_chromosomes.sort(reverse=True)  # Sorting in reverse order to avoid index issues
@@ -145,6 +147,7 @@ def tsp_GA():
         population = list(new_gen)
         gen += 1
 
+    print()
     # Create the plot
     plt.plot(range(gen), best_fitness)
     # Set x-axis ticks to display only whole numbers
@@ -178,5 +181,12 @@ start_city = 0  # Start from city A
 #tsp_tour = greedy_tsp(cities, start_city)
 #print("TSP Tour:", tsp_tour)
 
-tsp_GA()
+map = generate_map()
+start_point = random.choice(tuple(map))
+list_map = list(map)
+tsp_tour = greedy_tsp(list_map, list_map.index(start_point))
+print(tsp_tour)
+tsp_GA(map, start_point)
+
+
 

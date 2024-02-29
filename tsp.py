@@ -13,9 +13,18 @@ MIN_INT = -10
 MAX_INT = 10
 
 
-def fitness(chromosome):
-    for i in range(NUM_CITIES - 1):
+def euclidean_distance(p1, p2):
+    """Calculate the Euclidean distance between two cities."""
+    x1, y1 = p1
+    x2, y2 = p2
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
+
+def fitness(chromosome):
+    path_cost = 0
+    for i in range(NUM_CITIES - 1):
+        path_cost += euclidean_distance(chromosome[i], chromosome[i+1])
+    return path_cost
 
 
 # Select parents for crossover using proportioned selection
@@ -48,7 +57,7 @@ def crossover(parent1, parent2):
 
     child2 = parent2[:crossover_point]
     unvisited = parent2[crossover_point:]
-    child1 += [city for city in parent1 if city in unvisited]
+    child2 += [city for city in parent1 if city in unvisited]
 
     return child1, child2
 
@@ -58,22 +67,28 @@ def mutate(chromosome):
     random_number = random.random()
     # Check if the random number is less than or equal to the mutation probability
     if random_number <= MUTATION_PROBABILITY:
-        index1 = random.randint(1, NUM_CITIES - 2)
-        index2 = random.randint(1, NUM_CITIES - 2)
+        index1 = random.randint(1, NUM_CITIES - 1)
+        index2 = random.randint(1, NUM_CITIES - 1)
         chromosome[index1], chromosome[index2] = chromosome[index2], chromosome[index1]
     return chromosome
 
 
 def generate_random_population():
     # generate the first generation
+    map = set()
+    while len(map) < NUM_CITIES-1:
+        map.add((random.randint(MIN_INT, MAX_INT), random.randint(MIN_INT, MAX_INT)))
+
+    start_point = random.choice(tuple(map))
+    map.remove(start_point)
+
     population = []
     for i in range(GENERATION_SIZE):
-        chrom = set()
-        while len(chrom) < NUM_CITIES-1:
-            chrom.add((random.randint(MIN_INT, MAX_INT), random.randint(MIN_INT, MAX_INT)))
-        list_chrom = list(chrom)
-        list_chrom.append(list_chrom[0])
-        population.append(list_chrom)
+        chrom = list(map)
+        random.shuffle(chrom)
+        chrom.insert(0, start_point)
+        chrom.append(start_point)
+        population.append(chrom)
     return population
 
 
@@ -135,13 +150,6 @@ def tsp_GA():
     # Set x-axis ticks to display only whole numbers
     plt.xticks(range(NUM_GENERATIONS))
     plt.show()
-
-
-def euclidean_distance(p1, p2):
-    """Calculate the Euclidean distance between two cities."""
-    x1, y1 = p1
-    x2, y2 = p2
-    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 
 def greedy_tsp(cities, start):

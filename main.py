@@ -97,20 +97,19 @@ def eight_queens_GA():
             fitness_values.append(fitness_val)
             if fitness_val == BEST_FITNESS:
                 solutions_found += 1
-                if chrom not in unique_solutions: #todo delete?
-                    unique_solutions.append(chrom)
-                    print_board(chrom)
-        ## uncomment to stop when solution in found ## # todo delete?
-        if solutions_found > 0:
+                # if chrom not in unique_solutions: #todo delete?
+                #     unique_solutions.append(chrom)
+                #     print_board(chrom)
+        if solutions_found > 0: # todo delete?
             print("solution found at gen " + str(gen) + ". time: " + str(seconds))
-            # best_fitness.append(BEST_FITNESS)
+            # best_fitness.append(BEST_FITNESS) # uncomment to stop when a solution is found
             # gen += 1
             # break
         # print("total solutions found at gen " + str(gen) +: " + solutions_found) # todo delete?
         # new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
-        best_fitness.append(max(fitness_values[best_chromosomes[0]], fitness_values[best_chromosomes[1]]))
+        best_fitness.append(fitness_values[best_chromosomes[1]])
         # Add the two best chromosomes to the new gen
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])

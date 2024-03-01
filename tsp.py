@@ -1,11 +1,11 @@
+import itertools
 import math
 
 import random
 import matplotlib.pyplot as plt
 
-MAX_FITNESS = 2
-GENERATION_SIZE = 50
-NUM_GENERATIONS = 100
+GENERATION_SIZE = 100
+NUM_GENERATIONS = 1000
 ELITE = 2
 MUTATION_PROBABILITY = 0.1
 NUM_CITIES = 5
@@ -14,22 +14,24 @@ MAX_INT = 10
 
 
 def euclidean_distance(p1, p2):
-    """Calculate the Euclidean distance between two cities."""
     x1, y1 = p1
     x2, y2 = p2
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 
-def fitness(chromosome):
+def path_cost(path, cities_map):
     path_cost = 0
     for i in range(NUM_CITIES - 1):
-        path_cost += euclidean_distance(chromosome[i], chromosome[i+1])
-    return 1 / path_cost
+        path_cost += euclidean_distance(cities_map[path[i]], cities_map[path[i + 1]])
+    return path_cost
+
+
+def fitness(chromosome, cities_map):
+    return 1 / path_cost(chromosome, cities_map)
 
 
 # Select parents for crossover using proportioned selection
 def selection(population, fitness_vals):
-    # select parents for crossover:
     # Calculate total fitness sum of the population
     total_fitness = sum(fitness for fitness in fitness_vals)
     # Calculate probabilities for each individual based on fitness
@@ -47,7 +49,6 @@ def selection(population, fitness_vals):
 
 
 # Crossover operation
-# todo call (parent1, parent2), (parent2, parent1)
 def crossover(parent1, parent2):
     crossover_point = random.randint(1, NUM_CITIES - 1)
 
@@ -75,18 +76,20 @@ def mutate(chromosome):
 
 def generate_map():
     map = set()
-    while len(map) < NUM_CITIES - 1:
+    while len(map) < NUM_CITIES:
         map.add((random.randint(MIN_INT, MAX_INT), random.randint(MIN_INT, MAX_INT)))
-    return map
+    return list(map)
 
-def generate_random_population(map, start_point):
-    # generate the first generation
-    map.remove(start_point)
+
+def generate_random_population(start_point):
     population = []
     for i in range(GENERATION_SIZE):
-        chrom = list(map)
-        random.shuffle(chrom)
-        chrom.insert(0, start_point)
+        chrom = [start_point]
+        unvisited = [i for i in range(NUM_CITIES) if i != start_point]
+        while unvisited:
+            city = random.choice(unvisited)
+            chrom.append(city)
+            unvisited.remove(city)
         chrom.append(start_point)
         population.append(chrom)
     return population
@@ -103,12 +106,11 @@ def elitism_helper(fitness_scores):
     return best_indices, worst_indices
 
 
-def tsp_GA(map, start_point):
-    best_fitness = [] #todo change to avg?
-    # best_chromosomes = [] todo
-    # worst_chromosomes = []
+def GA_tsp(cities_map, start):
+    result = []
+    best_fitness = []
     # initialize population
-    population = generate_random_population(map, start_point)
+    population = generate_random_population(start)
     # do for each generation
     gen = 0
     while gen < NUM_GENERATIONS:
@@ -116,15 +118,15 @@ def tsp_GA(map, start_point):
         new_gen = []
         # evaluate fitness for each chromosome
         for chrom in population:
-            fitness_values.append(fitness(chrom))
-        # avg_fitness.append(sum(fitness_values) / len(fitness_values)) todo
+            fitness_values.append(fitness(chrom, cities_map))
         # new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
-        best_chromosomes.sort(reverse=True)
-        best_fitness.append(fitness_values[best_chromosomes[0]])
-        if gen == NUM_GENERATIONS-1:
-            print(population[best_chromosomes[0]])
+        best_fitness.append(fitness_values[best_chromosomes[1]])
+        if gen == NUM_GENERATIONS - 1:
+            result = population[best_chromosomes[1]]
+            gen += 1
+            break
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])
         worst_chromosomes.sort(reverse=True)  # Sorting in reverse order to avoid index issues
@@ -147,24 +149,22 @@ def tsp_GA(map, start_point):
         population = list(new_gen)
         gen += 1
 
-    print()
     # Create the plot
     plt.plot(range(gen), best_fitness)
     # Set x-axis ticks to display only whole numbers
     plt.xticks(range(NUM_GENERATIONS))
     plt.show()
+    return result
 
 
-def greedy_tsp(cities, start):
-    """Greedy algorithm for the Traveling Salesman Problem."""
-    n = len(cities)
-    unvisited = set(range(n))
+def greedy_tsp(cities_map, start):
+    unvisited = set(range(NUM_CITIES))
     path = [start]
     current_city = start
     unvisited.remove(start)
 
     while unvisited:
-        closest_city = min(unvisited, key=lambda city: euclidean_distance(cities[current_city], cities[city]))
+        closest_city = min(unvisited, key=lambda city: euclidean_distance(cities_map[current_city], cities_map[city]))
         path.append(closest_city)
         unvisited.remove(closest_city)
         current_city = closest_city
@@ -173,20 +173,41 @@ def greedy_tsp(cities, start):
     path.append(start)
     return path
 
-# Example cities represented as (x, y) coordinates
-cities = [(0, 0), (1, 2), (3, 1), (2, 3), (1, 1)]
-start_city = 0  # Start from city A
 
-# Find the TSP tour using the greedy algorithm
-#tsp_tour = greedy_tsp(cities, start_city)
-#print("TSP Tour:", tsp_tour)
+def brute_force_tsp(cities_map, start):
+    min_cost = float('inf')
+    optimal_path = []
+    cities_minus_start = [i for i in range(NUM_CITIES) if i != start]
+    # Generate all possible permutations of cities
+    for perm in itertools.permutations(cities_minus_start):
+        path = [start] + list(perm) + [start]
+        current_cost = path_cost(path, cities_map)
+        if current_cost < min_cost:
+            min_cost = current_cost
+            optimal_path = path
+    return optimal_path
 
-map = generate_map()
-start_point = random.choice(tuple(map))
-list_map = list(map)
-tsp_tour = greedy_tsp(list_map, list_map.index(start_point))
-print(tsp_tour)
-tsp_GA(map, start_point)
+
+def main():
+    cities_map = generate_map()
+    start_city = random.choice([i for i in range(NUM_CITIES)])
+
+    print("brute force results:")
+    optimal_path = brute_force_tsp(cities_map, start_city)
+    print(optimal_path)
+    print(path_cost(optimal_path, cities_map))
+
+    print("greedy algorithm results:")
+    greedy_path = greedy_tsp(cities_map, start_city)
+    print(greedy_path)
+    print(path_cost(greedy_path, cities_map))
+
+    print("GA results:")
+    GA_path = GA_tsp(cities_map, start_city)
+    print(GA_path)
+    print(path_cost(GA_path, cities_map))
 
 
+if __name__ == "__main__":
+    main()
 

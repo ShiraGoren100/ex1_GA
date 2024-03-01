@@ -1,31 +1,31 @@
 import random
 import matplotlib.pyplot as plt
+import time
 
-NUM_ROWS = 8
-MAX_FITNESS = 2
-GENERATION_SIZE = 50
+BOARD_SIZE = 8
+GENERATION_SIZE = 100
 NUM_GENERATIONS = 100
 ELITE = 2
 MUTATION_PROBABILITY = 0.1
-CONFLICTS_UPPER_BOUND = 28  # 7+6+5+4+3+2+1 = 28 todo explain
+MAX_CONFLICTS = 28  # 8 choose 2 = 28 (The max number of possible conflicts is between each pair of queens) todo explain in report
+BEST_FITNESS = MAX_CONFLICTS
 
 
 def num_of_conflicts(board):
     conflicts = 0
-    for i in range(NUM_ROWS):
-        for j in range(i + 1, NUM_ROWS):
+    for i in range(BOARD_SIZE):
+        for j in range(i + 1, BOARD_SIZE):
             if board[i] == board[j] or abs(i - j) == abs(board[i] - board[j]):
                 conflicts += 1
     return conflicts
 
 
 def fitness(chromosome):
-    return CONFLICTS_UPPER_BOUND - num_of_conflicts(chromosome)
+    return MAX_CONFLICTS - num_of_conflicts(chromosome)
 
 
 # Select parents for crossover using proportioned selection
 def selection(population, fitness_vals):
-    # select parents for crossover:
     # Calculate total fitness sum of the population
     total_fitness = sum(fitness for fitness in fitness_vals)
     # Calculate probabilities for each individual based on fitness
@@ -42,70 +42,78 @@ def selection(population, fitness_vals):
     return parents
 
 
-# Crossover operation (single-point crossover)
+# Single-point crossover
 def crossover(parent1, parent2):
-    crossover_point = random.randint(1, 7)
+    crossover_point = random.randint(1, BOARD_SIZE - 1)
     child1 = parent1[:crossover_point] + parent2[crossover_point:]
     child2 = parent2[:crossover_point] + parent1[crossover_point:]
     return child1, child2
 
 
-# Mutation operation: switch a value in the chromosome (the value is in range 0-7)
+# Mutation operation: switch a value in the chromosome (to value in the range [0,BOARD_SIZE-1])
 def mutate(chromosome):
     random_number = random.random()
     # Check if the random number is less than or equal to the mutation probability
     if random_number <= MUTATION_PROBABILITY:
-        mutated_position = random.randint(0, 7)
-        mutated_value = random.randint(0, 7)
+        mutated_position = random.randint(0, BOARD_SIZE - 1)
+        mutated_value = random.randint(0, BOARD_SIZE - 1)
         chromosome[mutated_position] = mutated_value
     return chromosome
 
 
+# Generate the first generation
 def generate_random_population():
-    # generate the first generation
     population = []
     for i in range(GENERATION_SIZE):
-        chrom = [random.randint(0, NUM_ROWS - 1) for _ in range(NUM_ROWS)]
+        chrom = [random.randint(0, BOARD_SIZE - 1) for i in range(BOARD_SIZE)]
         population.append(chrom)
     return population
 
 
 def elitism_helper(fitness_scores):
     # Sort the indices based on the fitness scores
-    sorted_indices = sorted(range(len(fitness_scores)), key=lambda k: fitness_scores[k])
-
-    # Get the indices of the arrays with the best and worst scores
+    sorted_indices = sorted(range(len(fitness_scores)), key=lambda index: fitness_scores[index])
+    # Get the indices of the chromosomes with the best and worst fitness scores
     best_indices = sorted_indices[-ELITE:]
     worst_indices = sorted_indices[:ELITE]
-
     return best_indices, worst_indices
 
 
 def eight_queens_GA():
-    best_fitness = [] #todo change to avg?
-    best_chromosomes = []
-    worst_chromosomes = []
-    # initialize population
+    seconds = time.time()
+    best_fitness = []
+    # Initialize population
     population = generate_random_population()
-    # do for each generation
     gen = 0
+    # Do for each generation
     while gen < NUM_GENERATIONS:
+        solutions_found = 0
         fitness_values = []
         new_gen = []
+        unique_solutions = [] # todo delete?
         # evaluate fitness for each chromosome
         for chrom in population:
-            fitness_values.append(fitness(chrom))
-        # avg_fitness.append(sum(fitness_values) / len(fitness_values)) todo
+            fitness_val = fitness(chrom)
+            fitness_values.append(fitness_val)
+            if fitness_val == BEST_FITNESS:
+                solutions_found += 1
+                # if chrom not in unique_solutions: #todo delete?
+                #     unique_solutions.append(chrom)
+                #     print_board(chrom)
+        if solutions_found > 0: # todo delete?
+            print("solution found at gen " + str(gen) + ". time: " + str(seconds))
+            # best_fitness.append(BEST_FITNESS) # uncomment to stop when a solution is found
+            # gen += 1
+            # break
+        # print("total solutions found at gen " + str(gen) +: " + solutions_found) # todo delete?
         # new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
-        best_chromosomes.sort(reverse=True)
-        best_fitness.append(fitness_values[best_chromosomes[0]])
-        if fitness_values[best_chromosomes[0]] == CONFLICTS_UPPER_BOUND:
-            gen += 1
-            break
+        best_fitness.append(fitness_values[best_chromosomes[1]])
+        # Add the two best chromosomes to the new gen
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])
+        # Remove the two worst chromosomes from the current gen
         worst_chromosomes.sort(reverse=True)  # Sorting in reverse order to avoid index issues
         for bad_i in worst_chromosomes:
             population.pop(bad_i)
@@ -121,41 +129,27 @@ def eight_queens_GA():
             # add children to new generation
             new_gen.append(child_1)
             new_gen.append(child_2)
-
         # move to next gen
         population = list(new_gen)
         gen += 1
 
-    print(num_of_conflicts(population[best_chromosomes[0]]))
-    print_board(population[best_chromosomes[0]])
-    print(gen)
     # Create the plot
     plt.plot(range(gen), best_fitness)
-    # Set x-axis ticks to display only whole numbers
-    plt.xticks(range(NUM_GENERATIONS))
+    plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
     plt.show()
 
 
-
 def eight_queens_random_sol():
+    seconds = time.time()
     # find a random solution to 8 queens problem
     num_of_tries = 0
     while True:
-        board = [random.randint(0, NUM_ROWS-1) for _ in range(NUM_ROWS)]
+        board = [random.randint(0, BOARD_SIZE - 1) for i in range(BOARD_SIZE)]
         if num_of_conflicts(board) == 0:
             # print_board(board)
+            print("time: " + str(seconds))
             return board, num_of_tries
 
-
-# def print_board(board):
-#     n = len(board)
-#     for i in range(n):
-#         for j in range(n):
-#             if board[j] == i:
-#                 print("Q", end=" ")
-#             else:
-#                 print(".", end=" ")
-#         print()
 
 def print_board(board):
     n = len(board)
@@ -166,9 +160,10 @@ def print_board(board):
             else:
                 print(".", end=" ")
         print()
+    print()
 
 def main():
-    # eight_queens_random_sol()
+    eight_queens_random_sol()
     eight_queens_GA()
 
 

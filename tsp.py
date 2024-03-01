@@ -121,8 +121,7 @@ def tsp_GA(map, start_point):
         # new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
-        best_chromosomes.sort(reverse=True)
-        best_fitness.append(fitness_values[best_chromosomes[0]])
+        best_fitness.append(max(fitness_values[best_chromosomes[0]], fitness_values[best_chromosomes[1]]))
         if gen == NUM_GENERATIONS-1:
             print(population[best_chromosomes[0]])
         for good_i in best_chromosomes:

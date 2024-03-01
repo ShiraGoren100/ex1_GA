@@ -1,9 +1,9 @@
 import random
 import matplotlib.pyplot as plt
+import time
 
 BOARD_SIZE = 8
-MAX_FITNESS = 2
-GENERATION_SIZE = 50
+GENERATION_SIZE = 100
 NUM_GENERATIONS = 100
 ELITE = 2
 MUTATION_PROBABILITY = 0.1
@@ -80,33 +80,37 @@ def elitism_helper(fitness_scores):
 
 
 def eight_queens_GA():
+    seconds = time.time()
     best_fitness = []
-    best_chromosomes = [] #todo
-    worst_chromosomes = []
-    solutions_found = 0
     # Initialize population
     population = generate_random_population()
     gen = 0
     # Do for each generation
-    while gen <= NUM_GENERATIONS:
+    while gen < NUM_GENERATIONS:
         solutions_found = 0
         fitness_values = []
         new_gen = []
+        unique_solutions = [] # todo delete?
         # evaluate fitness for each chromosome
         for chrom in population:
             fitness_val = fitness(chrom)
             fitness_values.append(fitness_val)
-            if fitness_val == MAX_FITNESS:
+            if fitness_val == BEST_FITNESS:
                 solutions_found += 1
-        if gen == NUM_GENERATIONS:
-            break
+                if chrom not in unique_solutions: #todo delete?
+                    unique_solutions.append(chrom)
+                    print_board(chrom)
+        ## uncomment to stop when solution in found ## # todo delete?
+        if solutions_found > 0:
+            print("solution found at gen " + str(gen) + ". time: " + str(seconds))
+            # best_fitness.append(BEST_FITNESS)
+            # gen += 1
+            # break
+        # print("total solutions found at gen " + str(gen) +: " + solutions_found) # todo delete?
         # new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
         best_fitness.append(max(fitness_values[best_chromosomes[0]], fitness_values[best_chromosomes[1]]))
-        # if fitness_values[best_chromosomes[0]] == BEST_FITNESS:  # Solution found
-        #     gen += 1
-        #     break
         # Add the two best chromosomes to the new gen
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])
@@ -130,24 +134,21 @@ def eight_queens_GA():
         population = list(new_gen)
         gen += 1
 
-    # print(num_of_conflicts(population[best_chromosomes[0]]))
-    # print_board(population[best_chromosomes[0]])
-    # print(gen)
-    print(solutions_found)
     # Create the plot
     plt.plot(range(gen), best_fitness)
-    # Set x-axis ticks to display only whole numbers
-    plt.xticks(range(NUM_GENERATIONS))
+    plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
     plt.show()
 
 
 def eight_queens_random_sol():
+    seconds = time.time()
     # find a random solution to 8 queens problem
     num_of_tries = 0
     while True:
         board = [random.randint(0, BOARD_SIZE - 1) for i in range(BOARD_SIZE)]
         if num_of_conflicts(board) == 0:
             # print_board(board)
+            print("time: " + str(seconds))
             return board, num_of_tries
 
 
@@ -160,9 +161,10 @@ def print_board(board):
             else:
                 print(".", end=" ")
         print()
+    print()
 
 def main():
-    # eight_queens_random_sol()
+    eight_queens_random_sol()
     eight_queens_GA()
 
 

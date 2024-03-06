@@ -190,7 +190,7 @@ def brute_force_tsp(cities_map, start):
 
 def main():
     cities_map = generate_map()
-    start_city = random.choice([i for i in range(NUM_CITIES)])
+    start_city = 0
 
     print("brute force results:")
     optimal_path = brute_force_tsp(cities_map, start_city)

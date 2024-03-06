@@ -4,8 +4,8 @@ import time
 
 BOARD_SIZE = 8
 GENERATION_SIZE = 100
-NUM_GENERATIONS = 100
-ELITE = 2
+NUM_GENERATIONS = 1000
+ELITE = 4
 MUTATION_PROBABILITY = 0.1
 MAX_CONFLICTS = 28  # 8 choose 2 = 28 (The max number of possible conflicts is between each pair of queens) todo explain in report
 BEST_FITNESS = MAX_CONFLICTS
@@ -80,32 +80,27 @@ def elitism_helper(fitness_scores):
 
 
 def eight_queens_GA():
-    seconds = time.time()
+    gen_solution_found = NUM_GENERATIONS + 1
+    start_time = time.time()
     best_fitness = []
+    avg_fitness = []
     # Initialize population
     population = generate_random_population()
     gen = 0
     # Do for each generation
     while gen < NUM_GENERATIONS:
-        solutions_found = 0
         fitness_values = []
         new_gen = []
-        unique_solutions = [] # todo delete?
         # evaluate fitness for each chromosome
         for chrom in population:
             fitness_val = fitness(chrom)
             fitness_values.append(fitness_val)
             if fitness_val == BEST_FITNESS:
-                solutions_found += 1
-                # if chrom not in unique_solutions: #todo delete?
-                #     unique_solutions.append(chrom)
-                #     print_board(chrom)
-        if solutions_found > 0: # todo delete?
-            print("solution found at gen " + str(gen) + ". time: " + str(seconds))
-            # best_fitness.append(BEST_FITNESS) # uncomment to stop when a solution is found
-            # gen += 1
-            # break
-        # print("total solutions found at gen " + str(gen) +: " + solutions_found) # todo delete?
+                if gen < gen_solution_found:
+                    gen_solution_found = gen
+                    total_time = time.time() - start_time
+                    print(f"eight_queens_GA - solution found at generation {gen}. time: {total_time:.5f}")
+        avg_fitness.append(sum(fitness_values) / len(fitness_values))
         # new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
@@ -134,20 +129,20 @@ def eight_queens_GA():
         gen += 1
 
     # Create the plot
-    plt.plot(range(gen), best_fitness)
+    plt.plot(range(gen), avg_fitness, label=avg_fitness)
+    plt.plot(range(gen), best_fitness, label=best_fitness)
     plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
-    plt.show()
 
 
 def eight_queens_random_sol():
-    seconds = time.time()
+    start_time = time.time()
     # find a random solution to 8 queens problem
     num_of_tries = 0
     while True:
         board = [random.randint(0, BOARD_SIZE - 1) for i in range(BOARD_SIZE)]
         if num_of_conflicts(board) == 0:
-            # print_board(board)
-            print("time: " + str(seconds))
+            total_time = time.time() - start_time
+            print(f"eight_queens_random_sol time: {total_time:.5f}")
             return board, num_of_tries
 
 
@@ -161,6 +156,7 @@ def print_board(board):
                 print(".", end=" ")
         print()
     print()
+
 
 def main():
     eight_queens_random_sol()

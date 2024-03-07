@@ -24,7 +24,7 @@ def fitness(chromosome):
     return MAX_CONFLICTS - num_of_conflicts(chromosome)
 
 
-# Select parents for crossover using proportioned selection
+# Select parents for crossover, using proportioned selection
 def selection(population, fitness_vals):
     # Calculate total fitness sum of the population
     total_fitness = sum(fitness for fitness in fitness_vals)

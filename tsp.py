@@ -6,11 +6,11 @@ import time
 import random
 import matplotlib.pyplot as plt
 
-GENERATION_SIZE = 100
+GENERATION_SIZE = 50
 NUM_GENERATIONS = 1000
 ELITE = 4
 MUTATION_PROBABILITY = 0.1
-NUM_CITIES = 48
+NUM_CITIES = 20
 MIN_INT = -10
 MAX_INT = 10
 RESULTS_FILE = "207814989_209549731.txt"
@@ -92,6 +92,7 @@ def generate_map_from_file(file):
             cities_map.append((x, y))
     return cities_map
 
+
 def generate_random_population(start_point):
     population = []
     for i in range(GENERATION_SIZE):
@@ -118,6 +119,7 @@ def elitism_helper(fitness_scores):
 
 
 def GA_tsp(cities_map, start):
+    start_time = time.time()
     result = []
     best_fitness = []
     avg_fitness = []
@@ -135,7 +137,7 @@ def GA_tsp(cities_map, start):
         # new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
-        best_fitness.append(fitness_values[best_chromosomes[1]])
+        best_fitness.append(fitness_values[best_chromosomes[-1]])
         if gen == NUM_GENERATIONS - 1:
             result = population[best_chromosomes[1]]
             gen += 1
@@ -161,6 +163,9 @@ def GA_tsp(cities_map, start):
         # move to next gen
         population = list(new_gen)
         gen += 1
+
+    total_time = time.time() - start_time
+    print(f"time: {total_time:.5f}")
 
     # Create the plot
     plt.plot(range(gen), avg_fitness, label=avg_fitness)
@@ -217,29 +222,26 @@ def run_from_file(file):
     total_time = time.time() - start_time
     print(f"time: {total_time:.5f}")
     print(path_cost(GA_path, cities_map))
-    print_to_results_file(GA_path)
+    print("path cost: " + str(path_cost(GA_path, cities_map)))
 
     print()
 
     print("greedy algorithm results:")
-    start_time = time.time()
     greedy_path = greedy_tsp(cities_map, start_city)
-    total_time = time.time() - start_time
-    print(f"time: {total_time:.5f}")
-    print(path_cost(greedy_path, cities_map))
+    print("path cost: " + str(path_cost(greedy_path, cities_map)))
 
 
 def run_all_algorithms():
     cities_map = generate_map()
     start_city = 0
 
-    print("brute force results:")
-    start_time = time.time()
-    optimal_path = brute_force_tsp(cities_map, start_city)
-    total_time = time.time() - start_time
-    print(f"time: {total_time:.5f}")
-    print(optimal_path)
-    print(path_cost(optimal_path, cities_map))
+    # print("brute force results:")
+    # start_time = time.time()
+    # optimal_path = brute_force_tsp(cities_map, start_city)
+    # total_time = time.time() - start_time
+    # print(f"time: {total_time:.5f}")
+    # print(optimal_path)
+    # print("path cost: " + str(path_cost(optimal_path, cities_map)))
 
     print()
 
@@ -249,23 +251,19 @@ def run_all_algorithms():
     total_time = time.time() - start_time
     print(f"time: {total_time:.5f}")
     print(greedy_path)
-    print(path_cost(greedy_path, cities_map))
+    print("path cost: " + str(path_cost(greedy_path, cities_map)))
 
     print()
 
     print("GA results:")
-    start_time = time.time()
     GA_path = GA_tsp(cities_map, start_city)
-    total_time = time.time() - start_time
-    print(f"time: {total_time:.5f}")
     print(GA_path)
-    print(path_cost(GA_path, cities_map))
-
+    print("path cost: " + str(path_cost(GA_path, cities_map)))
 
 
 def main():
-    # run_all_algorithms()
-    run_from_file("tsp.txt")
+    run_all_algorithms()
+    # run_from_file("tsp.txt")
 
 
 if __name__ == "__main__":

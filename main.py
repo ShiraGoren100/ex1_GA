@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 import time
 
 BOARD_SIZE = 8
-GENERATION_SIZE = 100
-NUM_GENERATIONS = 1000
+GENERATION_SIZE = 50
+NUM_GENERATIONS = 100
 ELITE = 4
 MUTATION_PROBABILITY = 0.1
-MAX_CONFLICTS = 28  # 8 choose 2 = 28 (The max number of possible conflicts is between each pair of queens) todo explain in report
+MAX_CONFLICTS = 28
 BEST_FITNESS = MAX_CONFLICTS
 
 
@@ -104,7 +104,7 @@ def eight_queens_GA():
         # new gen:
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
-        best_fitness.append(fitness_values[best_chromosomes[1]])
+        best_fitness.append(fitness_values[best_chromosomes[-1]])
         # Add the two best chromosomes to the new gen
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])
@@ -132,6 +132,7 @@ def eight_queens_GA():
     plt.plot(range(gen), avg_fitness, label=avg_fitness)
     plt.plot(range(gen), best_fitness, label=best_fitness)
     plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
+    plt.show()
 
 
 def eight_queens_random_sol():

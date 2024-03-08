@@ -4,13 +4,17 @@ import time
 import random
 import matplotlib.pyplot as plt
 
-GENERATION_SIZE = 50
-NUM_GENERATIONS = 1000
+GENERATION_SIZE = 100
+NUM_GENERATIONS = 2000
 ELITE = 4
 MUTATION_PROBABILITY = 0.1
 NUM_CITIES = 20
 MIN_INT = -10
 MAX_INT = 10
+TEST_MAP = [(-2, 8), (9, -7), (-3, -3), (-6, -2), (7, 1), (-1, 4), (-1, 7),
+            (-5, -4), (5, 3), (6, -8), (-7, 4), (-2, -3), (-1, 6), (8, -5),
+            (-6, 2), (7, -10), (1, -2), (6, -3), (-4, -4), (6, 9)]
+
 RESULTS_FILE = "207814989_209549731.txt"
 
 
@@ -215,23 +219,22 @@ def run_from_file(file):
     start_city = 0
 
     print("GA results:")
-    start_time = time.time()
     GA_path = GA_tsp(cities_map, start_city)
-    total_time = time.time() - start_time
-    print(f"time: {total_time:.5f}")
-    print(path_cost(GA_path, cities_map))
     print("path cost: " + str(path_cost(GA_path, cities_map)))
 
     print()
 
     print("greedy algorithm results:")
+    start_time = time.time()
     greedy_path = greedy_tsp(cities_map, start_city)
+    total_time = time.time() - start_time
+    print(f"time: {total_time:.5f}")
     print("path cost: " + str(path_cost(greedy_path, cities_map)))
 
+    print_to_results_file(GA_path)
 
-def run_all_algorithms():
-    cities_map = generate_map()
-    start_city = 0
+
+def run_all_algorithms(cities_map, start_city):
 
     # print("brute force results:")
     # start_time = time.time()
@@ -260,7 +263,10 @@ def run_all_algorithms():
 
 
 def main():
-    run_all_algorithms()
+    for i in range(5):
+        print()
+        print(i)
+        run_all_algorithms(TEST_MAP, 0)
     # run_from_file("tsp.txt")
 
 

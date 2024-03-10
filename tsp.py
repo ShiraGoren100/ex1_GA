@@ -169,11 +169,11 @@ def GA_tsp(cities_map, start):
     total_time = time.time() - start_time
     print(f"time: {total_time:.5f}")
 
-    # Create the plot
-    plt.plot(range(gen), avg_fitness, label=avg_fitness)
-    plt.plot(range(gen), best_fitness, label=best_fitness)
-    plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
-    plt.show()
+    # # Create the plot
+    # plt.plot(range(gen), avg_fitness, label=avg_fitness)
+    # plt.plot(range(gen), best_fitness, label=best_fitness)
+    # plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
+    # plt.show()
     return result
 
 
@@ -236,13 +236,13 @@ def run_from_file(file):
 
 def run_all_algorithms(cities_map, start_city):
 
-    # print("brute force results:")
-    # start_time = time.time()
-    # optimal_path = brute_force_tsp(cities_map, start_city)
-    # total_time = time.time() - start_time
-    # print(f"time: {total_time:.5f}")
-    # print(optimal_path)
-    # print("path cost: " + str(path_cost(optimal_path, cities_map)))
+    print("brute force results:")
+    start_time = time.time()
+    optimal_path = brute_force_tsp(cities_map, start_city)
+    total_time = time.time() - start_time
+    print(f"time: {total_time:.5f}")
+    print(optimal_path)
+    print("path cost: " + str(path_cost(optimal_path, cities_map)))
 
     print()
 
@@ -263,11 +263,12 @@ def run_all_algorithms(cities_map, start_city):
 
 
 def main():
-    for i in range(5):
-        print()
-        print(i)
-        run_all_algorithms(TEST_MAP, 0)
-    # run_from_file("tsp.txt")
+    # for i in range(5):
+    #     print()
+    #     print(i)
+    #     run_all_algorithms(TEST_MAP, 0)
+
+    run_from_file("tsp.txt")
 
 
 if __name__ == "__main__":

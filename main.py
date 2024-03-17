@@ -129,10 +129,10 @@ def eight_queens_GA():
         gen += 1
 
     # Create the plot
-    plt.plot(range(gen), avg_fitness, label=avg_fitness)
-    plt.plot(range(gen), best_fitness, label=best_fitness)
-    plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
-    plt.show()
+    # plt.plot(range(gen), avg_fitness, label=avg_fitness)
+    # plt.plot(range(gen), best_fitness, label=best_fitness)
+    # plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
+    # plt.show()
 
 
 def eight_queens_random_sol():

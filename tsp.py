@@ -5,9 +5,10 @@ import random
 import matplotlib.pyplot as plt
 
 GENERATION_SIZE = 200
-NUM_GENERATIONS = 2000
+NUM_GENERATIONS = 1000
 ELITE = 4
-MUTATION_PROBABILITY = 0.1
+MUTATION_PROBABILITY = 0.01
+CROSSOVER_PROBABILITY = 0.7
 NUM_CITIES = 20
 MIN_INT = -10
 MAX_INT = 10
@@ -55,17 +56,22 @@ def selection(population, fitness_vals):
 
 # Crossover operation
 def crossover(parent1, parent2):
-    crossover_point = random.randint(1, NUM_CITIES - 1)
+    random_number = random.random()
+    # Check if the random number is less than or equal to the mutation probability
+    if random_number <= CROSSOVER_PROBABILITY:
+        crossover_point = random.randint(1, NUM_CITIES - 1)
 
-    child1 = parent1[:crossover_point]
-    unvisited = parent1[crossover_point:]
-    child1 += [city for city in parent2[1:] if city in unvisited]
+        child1 = parent1[:crossover_point]
+        unvisited = parent1[crossover_point:]
+        child1 += [city for city in parent2[1:] if city in unvisited]
 
-    child2 = parent2[:crossover_point]
-    unvisited = parent2[crossover_point:]
-    child2 += [city for city in parent1[1:] if city in unvisited]
+        child2 = parent2[:crossover_point]
+        unvisited = parent2[crossover_point:]
+        child2 += [city for city in parent1[1:] if city in unvisited]
 
-    return child1, child2
+        return child1, child2
+
+    return parent1, parent2
 
 
 # Mutation operation: switch a value in the chromosome
@@ -169,11 +175,11 @@ def GA_tsp(cities_map, start):
     total_time = time.time() - start_time
     print(f"time: {total_time:.5f}")
 
-    # # Create the plot
-    # plt.plot(range(gen), avg_fitness, label=avg_fitness)
-    # plt.plot(range(gen), best_fitness, label=best_fitness)
-    # plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
-    # plt.show()
+    # Create the plot
+    plt.plot(range(gen), avg_fitness, label=avg_fitness)
+    plt.plot(range(gen), best_fitness, label=best_fitness)
+    plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
+    plt.show()
     return result
 
 
@@ -236,15 +242,15 @@ def run_from_file(file):
 
 def run_all_algorithms(cities_map, start_city):
 
-    print("brute force results:")
-    start_time = time.time()
-    optimal_path = brute_force_tsp(cities_map, start_city)
-    total_time = time.time() - start_time
-    print(f"time: {total_time:.5f}")
-    print(optimal_path)
-    print("path cost: " + str(path_cost(optimal_path, cities_map)))
-
-    print()
+    # print("brute force results:")
+    # start_time = time.time()
+    # optimal_path = brute_force_tsp(cities_map, start_city)
+    # total_time = time.time() - start_time
+    # print(f"time: {total_time:.5f}")
+    # print(optimal_path)
+    # print("path cost: " + str(path_cost(optimal_path, cities_map)))
+    #
+    # print()
 
     print("greedy algorithm results:")
     start_time = time.time()
@@ -263,12 +269,12 @@ def run_all_algorithms(cities_map, start_city):
 
 
 def main():
-    # for i in range(5):
-    #     print()
-    #     print(i)
-    #     run_all_algorithms(TEST_MAP, 0)
+    for i in range(5):
+        print()
+        print(i)
+        run_all_algorithms(TEST_MAP, 0)
 
-    run_from_file("tsp.txt")
+    # run_from_file("tsp.txt")
 
 
 if __name__ == "__main__":

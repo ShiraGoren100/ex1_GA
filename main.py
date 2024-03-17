@@ -3,10 +3,11 @@ import matplotlib.pyplot as plt
 import time
 
 BOARD_SIZE = 8
-GENERATION_SIZE = 50
-NUM_GENERATIONS = 100
+GENERATION_SIZE = 100
+NUM_GENERATIONS = 1000
 ELITE = 4
 MUTATION_PROBABILITY = 0.1
+CROSSOVER_PROBABILITY = 0.7
 MAX_CONFLICTS = 28
 BEST_FITNESS = MAX_CONFLICTS
 
@@ -44,10 +45,15 @@ def selection(population, fitness_vals):
 
 # Single-point crossover
 def crossover(parent1, parent2):
-    crossover_point = random.randint(1, BOARD_SIZE - 1)
-    child1 = parent1[:crossover_point] + parent2[crossover_point:]
-    child2 = parent2[:crossover_point] + parent1[crossover_point:]
-    return child1, child2
+    random_number = random.random()
+    # Check if the random number is less than or equal to the mutation probability
+    if random_number <= CROSSOVER_PROBABILITY:
+        crossover_point = random.randint(1, BOARD_SIZE - 1)
+        child1 = parent1[:crossover_point] + parent2[crossover_point:]
+        child2 = parent2[:crossover_point] + parent1[crossover_point:]
+        return child1, child2
+
+    return parent1, parent2
 
 
 # Mutation operation: switch a value in the chromosome (to value in the range [0,BOARD_SIZE-1])
@@ -105,6 +111,9 @@ def eight_queens_GA():
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
         best_fitness.append(fitness_values[best_chromosomes[-1]])
+        #  todo delete:
+        if len(best_fitness) >= 2 and best_fitness[-1] < best_fitness[-2]:
+            print("problem")
         # Add the two best chromosomes to the new gen
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])
@@ -129,10 +138,10 @@ def eight_queens_GA():
         gen += 1
 
     # Create the plot
-    # plt.plot(range(gen), avg_fitness, label=avg_fitness)
-    # plt.plot(range(gen), best_fitness, label=best_fitness)
-    # plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
-    # plt.show()
+    plt.plot(range(gen), avg_fitness, label=avg_fitness)
+    plt.plot(range(gen), best_fitness, label=best_fitness)
+    plt.xticks(range(NUM_GENERATIONS))  # Set x-axis ticks to display only whole numbers
+    plt.show()
 
 
 def eight_queens_random_sol():

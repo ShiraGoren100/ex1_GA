@@ -71,7 +71,7 @@ def crossover(parent1, parent2):
 
         return child1, child2
 
-    return parent1, parent2
+    return parent1.copy(), parent2.copy()
 
 
 # Mutation operation: switch a value in the chromosome

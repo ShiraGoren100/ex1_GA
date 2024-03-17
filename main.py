@@ -6,7 +6,7 @@ BOARD_SIZE = 8
 GENERATION_SIZE = 100
 NUM_GENERATIONS = 1000
 ELITE = 4
-MUTATION_PROBABILITY = 0.1
+MUTATION_PROBABILITY = 0.01
 CROSSOVER_PROBABILITY = 0.7
 MAX_CONFLICTS = 28
 BEST_FITNESS = MAX_CONFLICTS
@@ -53,7 +53,7 @@ def crossover(parent1, parent2):
         child2 = parent2[:crossover_point] + parent1[crossover_point:]
         return child1, child2
 
-    return parent1, parent2
+    return parent1.copy(), parent2.copy()
 
 
 # Mutation operation: switch a value in the chromosome (to value in the range [0,BOARD_SIZE-1])
@@ -111,9 +111,6 @@ def eight_queens_GA():
         # 1) elitism
         best_chromosomes, worst_chromosomes = elitism_helper(fitness_values)
         best_fitness.append(fitness_values[best_chromosomes[-1]])
-        #  todo delete:
-        if len(best_fitness) >= 2 and best_fitness[-1] < best_fitness[-2]:
-            print("problem")
         # Add the two best chromosomes to the new gen
         for good_i in best_chromosomes:
             new_gen.append(population[good_i])

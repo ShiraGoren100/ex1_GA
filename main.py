@@ -46,7 +46,7 @@ def selection(population, fitness_vals):
 # Single-point crossover
 def crossover(parent1, parent2):
     random_number = random.random()
-    # Check if the random number is less than or equal to the mutation probability
+    # Check if the random number is less than or equal to the crossover probability
     if random_number <= CROSSOVER_PROBABILITY:
         crossover_point = random.randint(1, BOARD_SIZE - 1)
         child1 = parent1[:crossover_point] + parent2[crossover_point:]
